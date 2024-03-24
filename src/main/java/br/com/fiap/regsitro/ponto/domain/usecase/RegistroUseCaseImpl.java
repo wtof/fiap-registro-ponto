@@ -70,7 +70,7 @@ public class RegistroUseCaseImpl implements RegistroUseCase {
 
     @Override
     public void enviarRegistrosPorEmail() {
-        Usuario usuario = usuarioRepository.buscarUsuarioPorEmail("walteroliveiraflorencio@gmail.com");
+        Usuario usuario = usuarioRepository.buscarUsuarioPorEmail(usuarioLogadoService.getEmailUsuarioLogado());
         List<Registro> registros = registroRepository.buscarTodosRegistrosDoUsuarioMesAnterior(usuario);
         registroService.enviarRegistrosPorEmail(registros);
     }

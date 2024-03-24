@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiap-api-registro-ponto
+  labels:
+    app: fiap-api-registro-ponto
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fiap-api-registro-ponto
+  template:
+    metadata:
+      name: fiap-api-registro-ponto
+      labels:
+        app: fiap-api-registro-ponto
+    spec:
+      containers:
+      - name: fiap-registro-ponto-container
+        image: wtof/fiap-registro-ponto:latest
+        ports:
+        - containerPort: 8081
+        envFrom:
+        - secretRef:
+            name: db-registro-ponto-secret
+        - secretRef:
+            name: ad-registro-ponto-secret
+        - configMapRef:
+            name: api-registro-ponto-configmap
+
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          periodSeconds: 60
+          failureThreshold: 5
+          initialDelaySeconds: 180
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8081
+          periodSeconds: 60
+          failureThreshold: 5
+          initialDelaySeconds: 180
+        resources:
+          requests:
+            cpu: 200m
+            memory: 228Mi
+          limits:
+            cpu: 400m
+            memory: 524Mi

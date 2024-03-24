@@ -1,0 +1,73 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ "master" ]
+
+env:
+  RESOURCE_GROUP: "FIAP_K8S_Terraform"
+  CLUSTER_NAME: "fiapterrafromcluster"
+  HPM_MANISFEST_PATH: "kubernetes/azure/infra"
+  SECRETS_MANIFEST_PATH: "kubernetes/azure/secrets"
+  CONFIG_MAPS_MANIFEST_PATH: "kubernetes/azure/config-maps"
+  SERVICES_MANIFEST_PATH: "kubernetes/azure/services"
+  DEPLOYMENT_MANIFEST_PATH: "kubernetes/azure/deployments"
+  IMAGE_TAG:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set IMAGE_TAG
+        run: echo "IMAGE_TAG=$(date +'%d%m%Y')" >> $GITHUB_ENV
+      - name: Build the Docker image
+        run: |
+          docker build . --file Dockerfile --tag wtof/fiap-registro-ponto:${{ env.IMAGE_TAG }}
+          docker build . --file Dockerfile --tag wtof/fiap-registro-ponto:latest
+      - name: Log in to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push wtof/fiap-registro-ponto:${{ env.IMAGE_TAG }}
+          docker push wtof/fiap-registro-ponto:latest
+
+  deploy:
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up kubelogin for non-interactive login
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: 'v0.0.25'
+
+      - name: Get K8s context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          admin: 'false'
+          use-kubelogin: 'true'
+
+      - name: Deploys application
+        uses: Azure/k8s-deploy@v4
+        with:
+          action: deploy
+          manifests: |
+           ${{ env.SECRETS_MANIFEST_PATH }}
+           ${{ env.CONFIG_MAPS_MANIFEST_PATH }}
+           ${{ env.SERVICES_MANIFEST_PATH }}
+           ${{ env.DEPLOYMENT_MANIFEST_PATH }}
+           ${{ env.HPM_MANISFEST_PATH }}
+          images: "docker.io/wtof/fiap-registro-ponto:${{ env.IMAGE_TAG }}"
