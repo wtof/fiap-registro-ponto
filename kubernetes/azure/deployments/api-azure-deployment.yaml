@@ -30,14 +30,14 @@ spec:
 
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /fiap-registro-ponto/actuator/health
             port: 8080
           periodSeconds: 60
           failureThreshold: 5
           initialDelaySeconds: 180
         readinessProbe:
           httpGet:
-            path: /actuator/health
+            path: /fiap-registro-ponto/actuator/health
             port: 8080
           periodSeconds: 60
           failureThreshold: 5
