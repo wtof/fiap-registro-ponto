@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-registro-ponto-configmap
+data:
+  SPRING_DATASOURCE_URL: jdbc:mysql://fiap-ponto.mysql.database.azure.com:3306/fiap-ponto
+  SPRING_PROFILES_ACTIVE: prod
+  SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
