@@ -1,20 +1,24 @@
 package br.com.fiap.regsitro.ponto.infra.ports.controller;
 
+import br.com.fiap.regsitro.ponto.application.mapper.RegistroPayloadMapper;
+import br.com.fiap.regsitro.ponto.application.payload.RegistroResponse;
+import br.com.fiap.regsitro.ponto.domain.entity.Registro;
+import br.com.fiap.regsitro.ponto.domain.entity.RelatorioDia;
 import br.com.fiap.regsitro.ponto.domain.ports.usecases.RegistroUseCase;
-import br.com.fiap.regsitro.ponto.infra.model.RegistroModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
 @RequestMapping("/v1/api")
 public class RegistroController {
     final RegistroUseCase registroUseCase;
+    final RegistroPayloadMapper registroPayloadMapper;
 
-    public RegistroController(RegistroUseCase registroUseCase) {
+    public RegistroController(RegistroUseCase registroUseCase, RegistroPayloadMapper registroPayloadMapper) {
         this.registroUseCase = registroUseCase;
+        this.registroPayloadMapper = registroPayloadMapper;
     }
     @PostMapping("/registro")
     public ResponseEntity<String> registrarPonto() {
@@ -22,16 +26,14 @@ public class RegistroController {
         return ResponseEntity.ok("Registro efetuado com sucesso!!");
     }
 
-    @GetMapping("/registro")
-    public ResponseEntity<String> gerarRelatorio(@RequestParam Long usuarioId) {
-        // Implementar a lógica para gerar o relatório aqui
-        return ResponseEntity.ok("OK");
+    @GetMapping("/relatorio")
+    public ResponseEntity<String> gerarRelatorio() {
+        registroUseCase.enviarRegistrosPorEmail();
+        return ResponseEntity.ok("Relatório enviado por e-mail com sucesso !");
     }
 
     @GetMapping("/registros")
-    public ResponseEntity<List<RegistroModel>> visualizarRegistros(@RequestParam Long usuarioId) {
-        // Implementar a lógica para visualizar os registros aqui
-        List<RegistroModel> registros = Collections.emptyList();
-        return ResponseEntity.ok(registros);
+    public ResponseEntity<RelatorioDia> visualizarRegistros() {
+        return ResponseEntity.ok(registroUseCase.buscarRelatorioDoUsuarioDoDia());
     }
 }

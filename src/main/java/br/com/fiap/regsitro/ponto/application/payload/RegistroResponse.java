@@ -1,15 +1,18 @@
-package br.com.fiap.regsitro.ponto.domain.entity;
+package br.com.fiap.regsitro.ponto.application.payload;
 
+import br.com.fiap.regsitro.ponto.domain.entity.Usuario;
 import br.com.fiap.regsitro.ponto.infra.model.TipoRegistro;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class Registro {
+public class RegistroResponse {
 
     private Long id;
+
     private Usuario usuario;
+
     private TipoRegistro tipoRegistro;
+
     LocalDateTime dataRegistro;
 
     public Long getId() {
@@ -42,15 +45,5 @@ public class Registro {
 
     public void setDataRegistro(LocalDateTime dataRegistro) {
         this.dataRegistro = dataRegistro;
-    }
-
-    @Override
-    public String toString() {
-        return "Registro{" +
-                "id=" + id +
-                ", usuario=" + usuario +
-                ", tipoRegistro=" + tipoRegistro +
-                ", dataRegistro=" + dataRegistro +
-                '}';
     }
 }
